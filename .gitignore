@@ -1,0 +1,6 @@
+.env
+build
+goflix
+
+*.env
+*.env.postgres

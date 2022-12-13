@@ -1,0 +1,37 @@
+# postgres with adminer
+
+version: "3.4"
+services:
+  adminer:
+    container_name: golifx-adminer
+    image: adminer:4.8.1
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_DB_DRIVER: pgsql
+      ADMINER_DESIGN: pepa-linha
+    ports:
+      - "8080:8080"
+    networks:
+      - goflix
+
+  postgres:
+    container_name: goflix-database
+    image: postgres
+    env_file:
+      - ./.env.postgres
+    environment:
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - goflix
+    restart: on-failure
+
+networks:
+  goflix:
+volumes:
+  postgres:
