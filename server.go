@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"goflix/middlewares"
+	"goflix/models"
 	"log"
 	"net/http"
 	"time"
@@ -30,7 +31,7 @@ func NewError(m string, s int) ResponseError {
 }
 
 type Server struct {
-	Store  Store
+	Store  models.Store
 	router *mux.Router
 }
 
