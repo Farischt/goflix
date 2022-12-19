@@ -9,7 +9,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// TODO: Extract controller & service in separated files
+func (s Server) handleCreateMovie() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
+
 // Controller layer
 func (s Server) handleGetMovies() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -32,8 +37,6 @@ func (s Server) handleGetMovies() http.HandlerFunc {
 		}
 
 		// send response
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
 		s.respondWithJSON(w, r, jsonMovies, http.StatusOK)
 	}
 }
@@ -65,20 +68,4 @@ func (s Server) handleGetMovie() http.HandlerFunc {
 		jsonMovie := models.MapMovieToJSON(*movie)
 		s.respondWithJSON(w, r, jsonMovie, http.StatusOK)
 	}
-}
-
-// Service layer
-func (store *DatabaseStore) GetMovie(id int) (*models.Movie, error) {
-	var movie models.Movie
-	err := store.db.Get(&movie, "SELECT * FROM movies WHERE id = ?", id)
-	if err != nil {
-		return nil, err
-	}
-	return &movie, nil
-}
-
-func (store *DatabaseStore) GetMovies() ([]*models.Movie, error) {
-	var movies []*models.Movie
-	err := store.db.Select(&movies, "SELECT * FROM movies")
-	return movies, err
 }
