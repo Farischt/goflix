@@ -25,12 +25,22 @@ func (m Movie) String() string {
 }
 
 func MapMovieToJSON(m Movie) JsonMovie {
-	return JsonMovie{
-		ID:          m.ID,
-		Title:       m.Title,
-		Description: m.Description,
-		ReleaseDate: m.ReleaseDate,
-		Duration:    m.Duration,
-		TrailerURL:  m.TrailerURL,
+	return JsonMovie(m)
+}
+
+// Service layer
+func (store *DatabaseStore) GetMovie(id int) (*Movie, error) {
+	var movie Movie
+	err := store.db.Get(&movie, "SELECT * FROM movies WHERE id = $1", id)
+
+	if err != nil {
+		return nil, err
 	}
+	return &movie, nil
+}
+
+func (store *DatabaseStore) GetMovies() ([]*Movie, error) {
+	var movies []*Movie
+	err := store.db.Select(&movies, "SELECT * FROM movies")
+	return movies, err
 }

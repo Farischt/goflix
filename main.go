@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"goflix/config"
+	"goflix/models"
 	"log"
 	"net/http"
 )
@@ -10,7 +11,7 @@ import (
 func run() error {
 	// Init server and db
 	s := NewServer()
-	s.Store = NewDatabaseStore()
+	s.Store = models.NewDatabaseStore()
 	err := s.Store.Open()
 	if err != nil {
 		return err
