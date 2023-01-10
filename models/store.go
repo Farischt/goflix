@@ -13,6 +13,8 @@ type Store interface {
 	Close() error
 	GetMovies() ([]*Movie, error)
 	GetMovie(id int) (*Movie, error)
+	CreateMovie(m *Movie) error
+	MovieExists(title string) bool
 }
 
 type DatabaseStore struct {

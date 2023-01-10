@@ -44,3 +44,14 @@ func (store *DatabaseStore) GetMovies() ([]*Movie, error) {
 	err := store.db.Select(&movies, "SELECT * FROM movies")
 	return movies, err
 }
+
+func (store *DatabaseStore) CreateMovie(m *Movie) error {
+	_, err := store.db.Exec(`INSERT INTO movies (title, description, release_date, duration, trailer_url) VALUES ($1, $2, $3, $4, $5)`, m.Title, m.Description, m.ReleaseDate, m.Duration, m.TrailerURL)
+	return err
+}
+
+func (store *DatabaseStore) MovieExists(title string) bool {
+	var movie Movie
+	err := store.db.Get(&movie, "SELECT * FROM movies WHERE title = $1", title)
+	return err == nil
+}

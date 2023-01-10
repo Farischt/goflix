@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"goflix/models"
 	"net/http"
 	"strconv"
@@ -10,8 +11,71 @@ import (
 )
 
 func (s Server) handleCreateMovie() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	type CreateMovieDTO struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		ReleaseDate string `json:"releaseDate"`
+		Duration    int64  `json:"duration"`
+		TrailerURL  string `json:"trailerUrl"`
+	}
 
+	return func(w http.ResponseWriter, r *http.Request) {
+		var movieBody CreateMovieDTO
+
+		err := s.decode(w, r, r.Body, &movieBody)
+		if err != nil {
+			customErr := NewError("couldn't parse movie body", http.StatusBadRequest)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		}
+
+		// run validation
+		if movieBody.Title == "" {
+			customErr := NewError("movie title cannot be empty", http.StatusBadRequest)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		} else if movieBody.Description == "" {
+			customErr := NewError("movie description cannot be empty", http.StatusBadRequest)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		} else if movieBody.ReleaseDate == "" {
+			customErr := NewError("movie release date cannot be empty", http.StatusBadRequest)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		} else if movieBody.Duration == 0 {
+			customErr := NewError("movie duration cannot be equal to 0", http.StatusBadRequest)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		} else if movieBody.TrailerURL == "" {
+			customErr := NewError("movie trailer url cannot be empty", http.StatusBadRequest)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		}
+
+		m := &models.Movie{
+			ID:          0,
+			Title:       movieBody.Title,
+			Description: movieBody.Description,
+			ReleaseDate: movieBody.ReleaseDate,
+			Duration:    movieBody.Duration,
+			TrailerURL:  movieBody.TrailerURL,
+		}
+
+		// Check if a movie with the same name already exists
+		if s.Store.MovieExists(m.Title) {
+			customErr := NewError("movie already exists", http.StatusConflict)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		}
+
+		err = s.Store.CreateMovie(m)
+		if err != nil {
+			fmt.Println(err)
+			customErr := NewError("couldn't create the movie", http.StatusInternalServerError)
+			s.respondWithError(w, r, customErr, log.Error)
+			return
+		}
+		s.respondWithJSON(w, r, m.Title, http.StatusAccepted)
 	}
 }
 
@@ -51,13 +115,7 @@ func (s Server) handleGetMovie() http.HandlerFunc {
 			return
 		}
 
-		// Error omitted here since err = nil is equal to movie == nil
 		movie, _ := s.Store.GetMovie(id)
-		// if err != nil {
-		// 	customErr := NewError("internal server error while retrieving the movie", http.StatusInternalServerError)
-		// 	s.respondWithError(w, r, customErr, log.Error)
-		// 	return
-		// }
 
 		if movie == nil {
 			customErr := NewError("movie not found", http.StatusNotFound)
