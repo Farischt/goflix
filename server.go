@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"goflix/middlewares"
 	"goflix/models"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -45,6 +46,10 @@ func NewServer() *Server {
 
 func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	s.router.ServeHTTP(w, r)
+}
+
+func (s *Server) decode(w http.ResponseWriter, r *http.Request, dataToDecode io.Reader, v interface{}) error {
+	return json.NewDecoder(dataToDecode).Decode(v)
 }
 
 func (s *Server) respondWithJSON(w http.ResponseWriter, _ *http.Request, data interface{}, status int) {
